@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Genxsis.Faith</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  html,body{width:100%;min-height:100%;margin:0;background:#020202;color:#fa0000}
+  /* The original entry screen contains only the red button on black. */
+  .entry-screen{position:fixed;inset:0;z-index:20;background:#020202;display:flex;
+    align-items:center;justify-content:center;transition:opacity .25s ease}
+  .entry-screen.is-hidden{opacity:0;pointer-events:none}
+  .entry-screen button{border:1px solid #fa0000;background:#fa0000;color:#020202;
+    font:inherit;font-size:clamp(16px,1.6vw,32px);padding:10px 22px;cursor:pointer;
+    transition:250ms ease-in-out}
+  .entry-screen button:hover{background:#020202;color:#fa0000}
+  .site{display:none;min-height:100vh}
+  .site.is-visible{display:flex}
+  .site header{min-height:100px}
+  .site header .site-header-left,.site header .site-header-right{width:80px;display:flex;align-items:center}
+  .site header .site-header-left img,.site header .site-header-right img{max-width:80px}
+  .key-trigger{border:0;background:transparent;padding:0;cursor:pointer;display:block;line-height:0}
+  .key-trigger img{display:block;max-width:80px;transition:transform .2s ease}
+  .key-trigger:hover img{transform:scale(1.07)}
+  .cipher-lightbox{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.96);display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box}
+  .cipher-lightbox.is-open{display:flex}
+  .cipher-lightbox img{display:block;max-width:min(94vw,1100px);max-height:92vh;width:auto;height:auto;object-fit:contain}
+  .cipher-close{position:absolute;top:18px;right:24px;border:1px solid #c00;background:#050505;color:#f00;font-size:30px;line-height:1;padding:5px 12px;cursor:pointer}
+  .site header .site-header-middle{position:absolute;left:50%;transform:translateX(-50%);text-align:center}
+  .site header .site-header-middle h1{color:#fa0000}
+  .site main{min-height:0;display:flex;flex:1;position:relative}
+  .site main .main-inner{position:relative;inset:auto;width:100%;min-height:55vh;display:flex;align-items:center;justify-content:center}
+  .video-frame{width:min(100%,1200px);aspect-ratio:4/3;margin:auto;background:#000}
+  .video-frame video{display:block;width:100%;height:100%;object-fit:contain;background:#000}
+  .site footer .site-footer-top{align-items:center}
+  .site footer .site-footer-top a{font-size:clamp(14px,1.2vw,20px)}
+  .overlay{position:fixed;inset:0;z-index:30;background:#020202;opacity:0;pointer-events:none;
+    overflow-y:auto;transition:opacity .2s ease;display:flex;flex-direction:column}
+  .overlay .overlay-header{display:flex;justify-content:flex-end}
+  .overlay .overlay-main{flex:1}
+  .overlay-evaluation .overlay-main .content{max-width:1200px}
+  .overlay-evaluation h2{color:#fa0000}
+  .question{display:none}
+  .question:first-child{display:block}
+  .question .radio-buttons label{color:#eee}
+  #submit-button{display:none;margin-top:24px}
+  .result-content{text-align:center;max-width:900px;margin:8vh auto;padding:24px;color:#eee}
+  .result-content h2{color:#fa0000}
+  .overlay-close{background:none;border:0;cursor:pointer}
+  .overlay-close span{pointer-events:none}
+  @media(max-width:720px){
+    .site header{min-height:82px}
+    .site header .site-header-left,.site header .site-header-right{width:48px}
+    .site header .site-header-left img,.site header .site-header-right img,.key-trigger img{max-width:48px}
+    .cipher-lightbox{padding:12px}.cipher-lightbox img{max-width:96vw;max-height:88vh}
+    .site main .main-inner{min-height:42vh}
+    .video-frame{width:100%}
+  }
+
+.result-card{max-width:860px;margin:5vh auto 8vh;padding:clamp(22px,4vw,48px);text-align:center;color:#eee}
+.result-card .result-emblem{width:clamp(150px,24vw,260px);height:auto;display:block;margin:0 auto 24px;filter:drop-shadow(0 0 18px rgba(250,0,0,.18))}
+.result-card h2{font-size:clamp(15px,1.5vw,20px);letter-spacing:.22em;color:#fa0000;text-transform:uppercase;margin:0 0 12px}
+.result-card h3{font-size:clamp(28px,4vw,48px);font-weight:500;margin:0 0 24px;color:#fff}
+.result-card p{font-size:clamp(15px,1.35vw,19px);line-height:1.8;color:#d7d7d7;text-align:left}
+.result-card .result-note{margin-top:28px;color:#888;font-size:12px;text-align:center}
+.result-card .result-again{margin-top:22px;border:1px solid #fa0000;background:transparent;color:#fa0000;padding:12px 26px;cursor:pointer;letter-spacing:.08em}
+.result-card .result-again:hover{background:#fa0000;color:#080808}
+
+
+  .video-area{width:100%;display:flex;flex-direction:column;align-items:center;gap:16px}
+  .video-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;width:100%}
+  .video-actions button{border:1px solid #fa0000;background:#050505;color:#fa0000;padding:10px 18px;font:inherit;cursor:pointer;transition:250ms ease}
+  .video-actions button:hover{background:#fa0000;color:#050505}
+  .video-frame{max-width:1200px}
+  .video-frame video{aspect-ratio:4/3}
+  .site header .site-header-left,.site header .site-header-right{flex:0 0 auto}
+  .site header .site-header-left img,.site header .site-header-right img,.key-trigger img{max-height:80px;object-fit:contain}
+  .redemption-screen{position:fixed;inset:0;z-index:200;background:#000;display:none;align-items:center;justify-content:center}
+  .redemption-screen.is-open{display:flex}
+  .redemption-screen video{width:100%;height:100%;max-width:100vw;max-height:100vh;object-fit:contain;background:#000}
+  .redemption-back{position:absolute;z-index:2;top:16px;left:16px;border:1px solid #fa0000;background:rgba(0,0,0,.82);color:#fa0000;padding:10px 16px;font:inherit;cursor:pointer}
+  @media(max-width:720px){
+    .site header{padding:16px}
+    .site header .site-header-left,.site header .site-header-right{width:48px}
+    .site header .site-header-left img,.site header .site-header-right img,.key-trigger img{max-width:48px;max-height:48px}
+    .site header .site-header-middle{max-width:55%;overflow:hidden}
+    .site header .site-header-middle h1{font-size:clamp(13px,4vw,20px)}
+    .site main{padding:0 12px}
+    .site main .main-inner{min-height:0;padding:12px 0}
+    .video-frame{width:100%;aspect-ratio:16/9}
+    .video-frame video{aspect-ratio:16/9}
+    .video-actions{gap:8px}
+    .video-actions button{font-size:13px;padding:10px 12px}
+    .site footer{padding:28px 16px 18px}
+    .site footer .site-footer-top{gap:18px}
+    .site footer .site-footer-top a{font-size:13px}
+    .site footer .site-footer-bottom{font-size:9px;overflow-wrap:anywhere}
+    .overlay .overlay-main{padding:16px}
+    .overlay-evaluation .overlay-main .content{width:100%}
+    .question{margin:28px 0}
+    .question .radio-buttons label span{width:calc(100% - 34px)}
+    .redemption-back{top:10px;left:10px;padding:8px 12px;font-size:14px}
+  }
+</style>
+</head>
+<body>
+<section class="entry-screen" id="entry">
+  <button id="enter-button" type="button">Join NEXTGEN</button>
+</section>
+
+<div class="site" id="site">
+  <header>
+    <div class="site-header-left"><button class="key-trigger pmg-trigger" id="pmg-trigger" type="button" aria-label="Abrir Dark Side"><img src="pmginev1973.png" alt="PMG INEV 1973"></button></div>
+    <div class="site-header-middle"><h1>Genxsis.Faith</h1></div>
+    <div class="site-header-right"><button class="key-trigger" id="key-trigger" type="button" aria-label="Abrir símbolo"><img src="key.png" alt="Símbolo"></button></div>
+  </header>
+
+  <main>
+    <div class="main-inner">
+      <div class="video-area">
+        <div class="video-frame">
+          <video id="announcement-player" controls playsinline preload="metadata" poster="poster.jpg">
+            <source src="1-Genxsis-aviso.mp4" type="video/mp4">
+            Seu navegador não suporta a reprodução de vídeo.
+          </video>
+        </div>
+        <div class="video-actions">
+          <button type="button" id="video-two">Assistir ao aviso 2</button>
+          <button type="button" id="random-announcement">Reproduzir aviso aleatório</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="site-footer-top">
+      <a href="#" class="evaluation-link" id="evaluation-link">Avaliação</a>
+      <a href="#" class="redemption-link" id="redemption-link">Redemption</a>
+    </div>
+    <div class="site-footer-bottom">© 2026 BMTH Entertainment recreated by @rodrigofresno</div>
+  </footer>
+</div>
+
+<section class="overlay overlay-evaluation" id="evaluation" aria-hidden="true">
+  <div class="overlay-header"><button class="overlay-close" type="button" aria-label="Fechar"><span></span><span></span></button></div>
+  <div class="overlay-main">
+    <div class="content">
+      <h2>Avaliação geral de aptidão e adequação moral</h2>
+      <p>Responda às perguntas a seguir para concluir sua avaliação.</p>
+      <form id="quiz">
+        <div class="question"><h3><span>001</span><br>Uma mulher está atravessando a rua e você vê um carro vindo em alta velocidade em sua direção. Nenhum dos dois está prestando atenção. O que você faz?</h3><div class="radio-buttons">
+          <label><input type="radio" name="q1" value="a"><span>Ignora a situação. Se esse é o destino dela, então que assim seja.</span></label>
+          <label><input type="radio" name="q1" value="b"><span>Grita para a mulher e a alerta sobre o carro em alta velocidade.</span></label>
+          <label><input type="radio" name="q1" value="c"><span>Corre para a rua e recebe o impacto no lugar dela.</span></label>
+          <label><input type="radio" name="q1" value="d"><span>Observa o que acontece.</span></label>
+        </div></div>
+        <div class="question"><h3><span>002</span><br>Você escala uma montanha que desejou alcançar durante toda a vida. Ao chegar ao topo, você se sente:</h3><div class="radio-buttons">
+          <label><input type="radio" name="q2" value="a"><span>Como se toda a sua vida tivesse levado a esse momento, mas, de alguma forma, você sente um vazio.</span></label>
+          <label><input type="radio" name="q2" value="b"><span>Eufórico, como se o mundo estivesse ao alcance das suas mãos.</span></label>
+          <label><input type="radio" name="q2" value="c"><span>Como se todo o seu corpo e sua alma tivessem mudado, aproximando-se do céu e do paraíso.</span></label>
+          <label><input type="radio" name="q2" value="d"><span>A dor da escalada tirou o seu entusiasmo.</span></label>
+        </div></div>
+        <div class="question"><h3><span>003</span><br>Um menino rouba um pão. Você descobre que ele não tem onde morar e está desesperado. O que você faz?</h3><div class="radio-buttons">
+          <label><input type="radio" name="q3" value="a"><span>Pega o pão de volta. Ele precisa aprender uma lição.</span></label>
+          <label><input type="radio" name="q3" value="b"><span>Dá dinheiro a ele e oferece acolhimento.</span></label>
+          <label><input type="radio" name="q3" value="c"><span>Leva-o para casa, dá comida e oferece adotá-lo.</span></label>
+          <label><input type="radio" name="q3" value="d"><span>Ignora o menino e segue em frente.</span></label>
+        </div></div>
+        <div class="question"><h3><span>004</span><br>Você recebe a oportunidade de descobrir a verdade por trás dos mistérios do mundo. O que faz?</h3><div class="radio-buttons">
+          <label><input type="radio" name="q4" value="a"><span>Caminha pela floresta e medita, buscando respostas dentro de si.</span></label>
+          <label><input type="radio" name="q4" value="b"><span>Conversa com um amigo sobre suas esperanças e seus sonhos.</span></label>
+          <label><input type="radio" name="q4" value="c"><span>Observa a lua e as estrelas, explorando simbolismo, espiritualidade e religião.</span></label>
+          <label><input type="radio" name="q4" value="d"><span>Pesquisa na deep web e investiga teorias da conspiração.</span></label>
+        </div></div>
+        <div class="question"><h3><span>005</span><br>Você vê uma esfera brilhante na escuridão. O que faz?</h3><div class="radio-buttons">
+          <label><input type="radio" name="q5" value="a"><span>Segue a esfera em direção a uma nova vida, pura e renovada.</span></label>
+          <label><input type="radio" name="q5" value="b"><span>Faz uma pausa e a examina de forma lógica.</span></label>
+          <label><input type="radio" name="q5" value="c"><span>Acolhe a esfera na palma da mão e encontra um caminho junto dela.</span></label>
+          <label><input type="radio" name="q5" value="d"><span>Passa por ela e segue o próprio caminho.</span></label>
+        </div></div>
+        <input disabled type="submit" id="submit-button" value="Enviar respostas">
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="overlay" id="result-overlay" aria-hidden="true">
+  <div class="overlay-header"><button class="overlay-close" type="button" aria-label="Fechar"><span></span><span></span></button></div>
+  <div class="overlay-main"><div class="result-content" id="result-content"></div></div>
+</section>
+
+<div class="cipher-lightbox" id="cipher-lightbox" role="dialog" aria-modal="true" aria-label="Imagem do símbolo"><button class="cipher-close" id="cipher-close" type="button" aria-label="Fechar imagem">×</button><img src="cypher(1).png" alt="Imagem do símbolo"></div>
+<div class="cipher-lightbox" id="darkside-lightbox" role="dialog" aria-modal="true" aria-label="Dark Side"><button class="cipher-close" id="darkside-close" type="button" aria-label="Fechar imagem">×</button><img src="darkside.jpg" alt="Dark Side"></div>
+
+<section class="redemption-screen" id="redemption" aria-hidden="true">
+  <button class="redemption-back" id="redemption-back" type="button">← Voltar</button>
+  <video id="redemption-player" controls playsinline></video>
+</section>
+
+<script>
+const entry=document.getElementById('entry');
+const site=document.getElementById('site');
+const entryAudio=new Audio('join the church of genxsis.mp3');
+document.getElementById('enter-button').addEventListener('click',()=>{
+  entryAudio.play().catch(()=>{});
+  entry.classList.add('is-hidden');
+  setTimeout(()=>{entry.style.display='none';site.classList.add('is-visible');},260);
+});
+function showOverlay(el){el.style.opacity='1';el.style.pointerEvents='auto';el.setAttribute('aria-hidden','false');document.body.classList.add('locked');}
+function hideOverlay(el){el.style.opacity='0';el.style.pointerEvents='none';el.setAttribute('aria-hidden','true');document.body.classList.remove('locked');}
+const evaluation=document.getElementById('evaluation');
+document.getElementById('evaluation-link').addEventListener('click',e=>{
+  e.preventDefault();
+  document.querySelectorAll('.question').forEach((q,i)=>q.style.display=i===0?'block':'none');
+  document.getElementById('submit-button').style.display='none';
+  showOverlay(evaluation);
+});
+const redemptionScreen=document.getElementById('redemption');
+const redemptionPlayer=document.getElementById('redemption-player');
+document.getElementById('redemption-link').addEventListener('click',e=>{
+  e.preventDefault();
+  const files=['coin.mp4','Cross.mp4'];
+  redemptionPlayer.pause();
+  redemptionPlayer.src=files[Math.floor(Math.random()*files.length)];
+  redemptionScreen.classList.add('is-open');
+  redemptionScreen.setAttribute('aria-hidden','false');
+  document.body.classList.add('locked');
+  redemptionPlayer.load();
+  redemptionPlayer.play().catch(()=>{});
+});
+function closeRedemption(){
+  redemptionPlayer.pause();redemptionPlayer.removeAttribute('src');redemptionPlayer.load();
+  redemptionScreen.classList.remove('is-open');redemptionScreen.setAttribute('aria-hidden','true');
+  document.body.classList.remove('locked');
+}
+document.getElementById('redemption-back').addEventListener('click',closeRedemption);
+const cipherBox=document.getElementById('cipher-lightbox');
+const darksideBox=document.getElementById('darkside-lightbox');
+document.getElementById('key-trigger').addEventListener('click',()=>cipherBox.classList.add('is-open'));
+document.getElementById('cipher-close').addEventListener('click',()=>cipherBox.classList.remove('is-open'));
+cipherBox.addEventListener('click',e=>{if(e.target===cipherBox)cipherBox.classList.remove('is-open');});
+document.getElementById('pmg-trigger').addEventListener('click',()=>darksideBox.classList.add('is-open'));
+document.getElementById('darkside-close').addEventListener('click',()=>darksideBox.classList.remove('is-open'));
+darksideBox.addEventListener('click',e=>{if(e.target===darksideBox)darksideBox.classList.remove('is-open');});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){cipherBox.classList.remove('is-open');darksideBox.classList.remove('is-open');closeRedemption();}});
+document.querySelectorAll('.overlay-close').forEach(btn=>btn.addEventListener('click',()=>{
+  hideOverlay(btn.closest('.overlay'));
+}));
+document.querySelectorAll('.question input').forEach(input=>input.addEventListener('change',()=>{
+  const questions=[...document.querySelectorAll('.question')];
+  const index=questions.indexOf(input.closest('.question'));
+  if(index<questions.length-1) questions[index+1].style.display='block';
+  const allDone=questions.every(q=>q.querySelector('input:checked'));
+  const submit=document.getElementById('submit-button');
+  submit.disabled=!allDone;
+  if(allDone) submit.style.display='inline-block';
+}));
+
+const announcementPlayer=document.getElementById('announcement-player');
+const announcementFiles=['1-Genxsis-aviso.mp4','2-Genxsis-aviso-2.mp4','3-Genxsis-aviso.mp4','4-Genxsis-aviso.mp4','5-Genxsis-aviso.mp4','6-Genxsis-aviso.mp4','7-Genxsis-aviso.mp4'];
+function playAnnouncement(index){
+  announcementPlayer.pause();announcementPlayer.src=announcementFiles[index];
+  announcementPlayer.load();announcementPlayer.play().catch(()=>{});
+}
+document.getElementById('video-two').addEventListener('click',()=>playAnnouncement(1));
+document.getElementById('random-announcement').addEventListener('click',()=>playAnnouncement(2+Math.floor(Math.random()*5)));
+
+const resultProfiles={
+ a:{name:'Blessed Exalter',image:'blessed_exalter.png',description:"Louvado sejas, em grande medida. Palavras ligadas ao teu próprio eu e ao ego passam por ti como o vento; palavras como eu e meu pesam em tua mão como uma pena e caem ao chão. Não temes a morte, a vida ou o que existe entre ambas. Vives para aprimorar a ti mesmo e desejas ajudar todos os seres. Estendes uma mão generosa e acolhes todos os que a procuram."},
+ b:{name:'Chaos Seeker',image:'chaos_seeker.png',description:"O fogo consome tua alma, queimando e envolvendo teu corpo, teus membros e teu espírito. Traças um novo caminho no mapa da vida, com intensidade e força. Tua linha de fogo atravessa as convenções e os costumes sociais, rasgando o mapa sem se importar com julgamentos. Tua mente se aproxima perigosamente da fronteira do caos. Caminha com cuidado."},
+ c:{name:'Destiny Walker',image:'destiny_walker.png',description:"Ó alma esperançosa e corajosa, que permite aos próprios pés avançar, um passo de cada vez, pelo caminho destinado. Ó grande jornada, ó mapa do destino, esculpido diante de ti como pedras de um caminho inevitável. O Caminhante do Destino não depende da visão: a passagem foi feita para seus pés. Mesmo às cegas ou perdido no desconhecido, iluminarás a direção verdadeira com teu primeiro passo. Não temas as curvas da jornada; qualquer porta que escolhas estará de acordo com teu destino."},
+ d:{name:'Logic Dweller',image:'logic_dweller.png',description:"A lógica é tua luz-guia e brilha intensamente em teu peito, enquanto o pensamento serve como farol para teu julgamento. Dedicas tempo precioso a refletir e meditar, com calma e serenidade, sobre os caminhos da vida. Cada opção é pesada na balança da verdade e da justiça. Também cometes erros ao ponderar profundamente, mas teu foco nunca foi o de um santo: é o de alguém sábio, humilde e atento à própria direção."}
+};
+document.getElementById('quiz').addEventListener('submit',e=>{
+  e.preventDefault();
+  const counts={a:0,b:0,c:0,d:0};
+  document.querySelectorAll('.question input:checked').forEach(i=>counts[i.value]++);
+  const max=Math.max(...Object.values(counts));
+  const winners=Object.keys(counts).filter(k=>counts[k]===max);
+  const key=winners.sort((x,y)=>'abcd'.indexOf(x)-'abcd'.indexOf(y))[0];
+  const profile=resultProfiles[key];
+  const result=document.getElementById('result-content');
+  result.innerHTML=`<div class="result-card">
+    <h2>Resultado da avaliação</h2>
+    <img class="result-emblem" src="${profile.image}" alt="${profile.name} emblem">
+    <h3>${profile.name}</h3>
+    <p>${profile.description}</p>
+    ${winners.length>1?'<p class="result-note">Suas respostas ficaram empatadas. Este resultado representa o primeiro perfil entre os resultados empatados.</p>':''}
+    <p class="result-note">Sua avaliação foi concluída.</p>
+    <button class="result-again" type="button" id="result-again">REFAZER A AVALIAÇÃO</button>
+  </div>`;
+  hideOverlay(evaluation);showOverlay(document.getElementById('result-overlay'));
+  document.getElementById('result-again').addEventListener('click',()=>{
+    document.getElementById('quiz').reset();
+    document.querySelectorAll('.question').forEach((q,i)=>q.style.display=i===0?'block':'none');
+    const submit=document.getElementById('submit-button');
+    submit.disabled=true;submit.style.display='none';
+    hideOverlay(document.getElementById('result-overlay'));
+    showOverlay(evaluation);
+  });
+});
+
+</script>
+</body>
+</html>

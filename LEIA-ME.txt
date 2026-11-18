@@ -1,0 +1,23 @@
+GENXSIS.FAITH — COMO PUBLICAR
+
+1. Extraia este ZIP.
+2. Envie todos os arquivos e pastas extraídos para a RAIZ do repositório no GitHub.
+3. No GitHub, entre em Settings → Pages.
+4. Em Build and deployment, escolha Deploy from a branch.
+5. Selecione a branch main e a pasta /(root), depois clique em Save.
+6. Aguarde a publicação e acesse o endereço indicado pelo GitHub.
+
+O site usa uma única versão responsiva para computador e celular.
+O arquivo index.html fica na raiz. Não envie o ZIP como um único arquivo.
+
+FUNÇÕES
+- Join NEXTGEN: entra no site e inicia o áudio incluído.
+- Avisos: aviso 1 por padrão, botão para o aviso 2 e seleção aleatória dos avisos 3 a 7.
+- Avaliação: perguntas e resultados em português.
+- Redemption: abre Coin/Cross aleatoriamente em tela cheia; use Voltar para retornar.
+- Clique em pmginev1973.png para abrir darkside.jpg.
+
+NOTA SOBRE OS ARQUIVOS
+O pacote recebido contém "join the church of genxsis.mp3" e "key.png".
+Não foram encontrados "Join the Church of Jenkins.mp3" nem "K.png".
+Esta versão usa os arquivos existentes no ZIP recebido.
